@@ -1,7 +1,6 @@
 package com.soma2026.tikitalka.data.remote.dto
 
 import com.soma2026.tikitalka.domain.model.Issue
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -29,11 +28,3 @@ fun IssueDto.toDomain(): Issue = Issue(
     originalContent = originalContent,
 )
 
-@Serializable
-data class PagedIssueDto(
-    val content: List<IssueDto>,
-    val page: Int,
-    val size: Int,
-    val totalElements: Int,
-    val totalPages: Int,
-)

@@ -24,8 +24,3 @@ fun ChatMessageDto.toDomain(): ChatMessage = ChatMessage(
     createdAt = createdAt,
 )
 
-@Serializable
-data class SendMessageRequestDto(
-    val deviceId: String,
-    val message: String,
-)

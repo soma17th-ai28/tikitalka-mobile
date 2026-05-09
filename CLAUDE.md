@@ -298,10 +298,10 @@ class DashboardViewModel(
 
 ### 주요 API 엔드포인트
 ```
-GET  /api/v1/issues                        # 화제성 이슈 리스트
-GET  /api/v1/issues/{id}                   # 이슈 상세
-POST /api/v1/chat/message                  # 채팅 메시지 전송
-GET  /api/v1/chat/{sessionId}/history      # 대화 히스토리
+GET  /api/news                             # 화제성 뉴스 리스트 (tag, page, size, sort 쿼리 파라미터)
+GET  /api/news/{id}                        # 뉴스 상세
+POST /api/chat/message                     # 채팅 메시지 전송 (deviceId, message)
+GET  /api/chat/history/{deviceId}          # 대화 히스토리
 ```
 
 ---

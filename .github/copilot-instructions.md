@@ -41,7 +41,8 @@ composeApp (UI)
 
 ### Data 레이어
 - `RepositoryImpl`은 반드시 `domain`의 Repository 인터페이스를 구현한다.
-- DTO와 도메인 모델은 반드시 분리하고, 변환은 Mapper를 통해서만 수행한다.
+- DTO와 도메인 모델은 반드시 분리한다.
+- DTO → 도메인 변환은 DTO 파일 내 확장함수(`fun XxxDto.toDomain()`)로 구현한다. 별도 Mapper 파일을 만들지 않는다. (DTO 변경과 변환 로직 변경이 항상 함께 발생하므로 같은 파일에 공존시킨다)
 - DTO에는 `@Serializable`을 붙인다.
 - API 호출 결과는 반드시 `runCatching`으로 감싸 `Result<T>`를 반환한다.
 
@@ -58,7 +59,7 @@ composeApp (UI)
 ## PR 리뷰 시 중점 확인 항목
 1. 의존성 방향이 위 규칙을 위반하지 않는지 확인한다. (특히 `domain`의 역방향 의존 여부)
 2. `domain`에 Android / Ktor / Koin 등 외부 라이브러리 의존성이 유입되지 않았는지 확인한다.
-3. DTO ↔ 도메인 모델 변환이 Mapper를 통해서만 이루어지는지 확인한다.
+3. DTO → 도메인 변환이 DTO 파일 내 `toDomain()` 확장함수로 구현되었는지 확인한다. (별도 Mapper 파일 금지)
 4. `ViewModel`이 UseCase만 참조하고 Repository를 직접 참조하지 않는지 확인한다.
 5. 일회성 이벤트(네비게이션, 토스트)를 `State` 대신 `Effect`로 처리했는지 확인한다.
 6. `State`가 불변 `data class`이고 `copy()`로만 갱신되는지 확인한다.
