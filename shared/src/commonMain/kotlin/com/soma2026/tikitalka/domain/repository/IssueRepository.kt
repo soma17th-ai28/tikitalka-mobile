@@ -5,10 +5,10 @@ import com.soma2026.tikitalka.domain.model.PagedResult
 
 interface IssueRepository {
     suspend fun getIssues(
-        tag: String? = null,
-        page: Int = 0,
-        size: Int = 10,
-        sort: String = "LATEST",
+        tag: String?,
+        page: Int,
+        size: Int,
+        sort: String,
     ): Result<PagedResult<Issue>>
 
     suspend fun getIssueDetail(id: String): Result<Issue>

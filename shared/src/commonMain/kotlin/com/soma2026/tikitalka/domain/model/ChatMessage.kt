@@ -4,10 +4,5 @@ data class ChatMessage(
     val role: MessageRole,
     val content: String,
     val suggestedQuestion: String?,
-    val timestamp: String,
+    val createdAt: String,
 )
-
-enum class MessageRole {
-    USER,
-    ASSISTANT,
-}
