@@ -3,6 +3,9 @@ package com.soma2026.tikitalka.app
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
@@ -49,10 +52,20 @@ fun App() {
             }
 
             NavigationBar(
+                modifier = Modifier.height(56.dp),
                 containerColor = MaterialTheme.colorScheme.surface,
+                tonalElevation = 0.dp,
             ) {
                 val isDashboard = currentRoute == Screen.Dashboard.route
                 val isChat = currentRoute == Screen.Chat.route
+
+                val itemColors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor = Color.Transparent,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
 
                 NavigationBarItem(
                     selected = isDashboard,
@@ -69,14 +82,8 @@ fun App() {
                             contentDescription = "피드",
                         )
                     },
-                    label = { Text("피드") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    ),
+                    label = { Text("피드", style = MaterialTheme.typography.labelSmall) },
+                    colors = itemColors,
                 )
                 NavigationBarItem(
                     selected = isChat,
@@ -93,14 +100,8 @@ fun App() {
                             contentDescription = "채팅",
                         )
                     },
-                    label = { Text("채팅") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    ),
+                    label = { Text("채팅", style = MaterialTheme.typography.labelSmall) },
+                    colors = itemColors,
                 )
             }
         }
