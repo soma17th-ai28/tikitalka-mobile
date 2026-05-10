@@ -7,7 +7,7 @@ import org.koin.android.ext.koin.androidContext
 class TikiTalkaApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        initKoin {
+        initKoin(baseUrl = BuildConfig.BASE_URL) {
             androidContext(this@TikiTalkaApp)
         }
     }

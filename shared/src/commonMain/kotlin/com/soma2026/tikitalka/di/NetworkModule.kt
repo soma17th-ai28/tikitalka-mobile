@@ -5,12 +5,12 @@ import com.soma2026.tikitalka.data.remote.api.IssueApi
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.http.URLProtocol
+import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
-val networkModule = module {
+fun networkModule(baseUrl: String) = module {
     single {
         HttpClient {
             install(ContentNegotiation) {
@@ -22,11 +22,7 @@ val networkModule = module {
                 )
             }
             defaultRequest {
-                url {
-                    protocol = URLProtocol.HTTP
-                    host = "localhost"
-                    port = 8080
-                }
+                url(baseUrl)
             }
         }
     }

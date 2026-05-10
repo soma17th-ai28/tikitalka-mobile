@@ -3,10 +3,13 @@ package com.soma2026.tikitalka.di
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 
-fun initKoin(appDeclaration: KoinApplication.() -> Unit = {}): KoinApplication = startKoin {
+fun initKoin(
+    baseUrl: String,
+    appDeclaration: KoinApplication.() -> Unit = {},
+): KoinApplication = startKoin {
     appDeclaration()
     modules(
-        networkModule,
+        networkModule(baseUrl),
         repositoryModule,
         useCaseModule,
         viewModelModule,
