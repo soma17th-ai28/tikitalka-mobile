@@ -49,7 +49,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.soma2026.tikitalka.domain.model.ChatMessage
@@ -82,7 +81,6 @@ fun ChatScreen(
         snackbarHostState = snackbarHostState,
         onInputChange = { viewModel.handleIntent(ChatIntent.UpdateInput(it)) },
         onSend = { viewModel.handleIntent(ChatIntent.SendMessage) },
-        onSuggestedQuestion = { viewModel.handleIntent(ChatIntent.SelectSuggestedQuestion(it)) },
     )
 }
 
@@ -93,7 +91,6 @@ internal fun ChatContent(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onInputChange: (String) -> Unit = {},
     onSend: () -> Unit = {},
-    onSuggestedQuestion: (String) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
 
@@ -144,10 +141,7 @@ internal fun ChatContent(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             items(state.messages) { message ->
-                                MessageBubble(
-                                    message = message,
-                                    onSuggestedQuestion = onSuggestedQuestion,
-                                )
+                                MessageBubble(message = message)
                             }
                             if (state.isSending) {
                                 item { ThinkingBubble() }
@@ -168,10 +162,7 @@ internal fun ChatContent(
 }
 
 @Composable
-private fun MessageBubble(
-    message: ChatMessage,
-    onSuggestedQuestion: (String) -> Unit,
-) {
+private fun MessageBubble(message: ChatMessage) {
     val isUser = message.role == MessageRole.USER
 
     Column(
@@ -202,14 +193,6 @@ private fun MessageBubble(
                         else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-
-        if (!isUser && message.suggestedQuestion != null) {
-            Spacer(modifier = Modifier.height(6.dp))
-            SuggestedQuestionChip(
-                text = message.suggestedQuestion,
-                onClick = { onSuggestedQuestion(message.suggestedQuestion) },
-            )
-        }
     }
 }
 
@@ -238,42 +221,21 @@ private fun ThinkingBubble() {
 }
 
 @Composable
-private fun SuggestedQuestionChip(
-    text: String,
-    onClick: () -> Unit,
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.primaryContainer,
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(text = "💬", style = MaterialTheme.typography.labelSmall)
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
-}
-
-@Composable
 private fun EmptyChatPlaceholder(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(text = "⚽", style = MaterialTheme.typography.displaySmall)
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "AI와 축구 이야기를\n나눠보세요!",
+            text = "새로운 채팅을 시도하세요",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "축구 이슈에 대해 AI와\n자유롭게 이야기해 보세요!",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

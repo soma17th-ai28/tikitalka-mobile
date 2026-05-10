@@ -38,7 +38,6 @@ class ChatViewModel(
             is ChatIntent.LoadHistory -> loadHistory()
             is ChatIntent.UpdateInput -> _state.update { it.copy(inputText = intent.text) }
             is ChatIntent.SendMessage -> sendMessage()
-            is ChatIntent.SelectSuggestedQuestion -> _state.update { it.copy(inputText = intent.text) }
         }
     }
 
