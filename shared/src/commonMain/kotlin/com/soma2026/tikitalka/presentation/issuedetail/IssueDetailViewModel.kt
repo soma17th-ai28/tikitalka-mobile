@@ -52,7 +52,7 @@ class IssueDetailViewModel(
         if (_state.value.selectedLanguage == language) return
         _state.update { it.copy(selectedLanguage = language, translatedContent = null) }
 
-        if (language == TranslationLanguage.KOREAN) return
+        if (language == TranslationLanguage.ENGLISH) return
 
         val content = _state.value.issue?.originalContent ?: return
         viewModelScope.launch {

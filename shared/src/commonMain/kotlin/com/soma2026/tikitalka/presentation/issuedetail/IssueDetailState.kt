@@ -7,7 +7,7 @@ data class IssueDetailState(
     val issue: Issue? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val selectedLanguage: TranslationLanguage = TranslationLanguage.KOREAN,
+    val selectedLanguage: TranslationLanguage = TranslationLanguage.ENGLISH,
     val translatedContent: String? = null,
     val isTranslating: Boolean = false,
 )
