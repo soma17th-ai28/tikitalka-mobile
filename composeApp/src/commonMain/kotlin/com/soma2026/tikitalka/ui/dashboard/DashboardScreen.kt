@@ -50,6 +50,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun DashboardScreen(
+    onNavigateToDetail: (String) -> Unit = {},
     viewModel: DashboardViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -58,7 +59,7 @@ fun DashboardScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is DashboardEffect.NavigateToChat -> snackbarHostState.showSnackbar("아직 구현되지 않은 기능입니다") // TODO: #6 Chat UI
+                is DashboardEffect.NavigateToDetail -> onNavigateToDetail(effect.issueId)
                 is DashboardEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
             }
         }
