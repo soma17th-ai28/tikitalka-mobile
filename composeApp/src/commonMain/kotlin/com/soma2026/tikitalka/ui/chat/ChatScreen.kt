@@ -149,16 +149,16 @@ internal fun ChatContent(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             itemsIndexed(state.messages) { index, message ->
-                                val showDateSeparator =
-                                    index == 0 ||
-                                        parseDate(state.messages[index - 1].createdAt) != parseDate(message.createdAt)
-                                if (showDateSeparator && message.createdAt.isNotEmpty()) {
-                                    DateSeparator(date = formatDate(message.createdAt))
+                                val localDt = parseToLocalDateTime(message.createdAt)
+                                val prevLocalDt = if (index > 0) parseToLocalDateTime(state.messages[index - 1].createdAt) else null
+                                val showDateSeparator = index == 0 || datePart(prevLocalDt) != datePart(localDt)
+                                if (showDateSeparator && localDt != null) {
+                                    DateSeparator(date = formatDate(localDt))
                                     Spacer(modifier = Modifier.height(4.dp))
                                 }
                                 MessageBubble(
                                     message = message,
-                                    time = formatTime(message.createdAt),
+                                    time = formatTime(localDt),
                                     onSuggestedQuestionClick = onSuggestedQuestionClick,
                                 )
                             }
@@ -293,18 +293,18 @@ private fun parseToLocalDateTime(createdAt: String): LocalDateTime? {
     }
 }
 
-private fun formatTime(createdAt: String): String {
-    val local = parseToLocalDateTime(createdAt) ?: return ""
+private fun formatTime(local: LocalDateTime?): String {
+    local ?: return ""
     return "${local.hour.toString().padStart(2, '0')}:${local.minute.toString().padStart(2, '0')}"
 }
 
-private fun formatDate(createdAt: String): String {
-    val local = parseToLocalDateTime(createdAt) ?: return ""
+private fun formatDate(local: LocalDateTime?): String {
+    local ?: return ""
     return "${local.year}년 ${local.month.number}월 ${local.dayOfMonth}일"
 }
 
-private fun parseDate(createdAt: String): String {
-    val local = parseToLocalDateTime(createdAt) ?: return ""
+private fun datePart(local: LocalDateTime?): String {
+    local ?: return ""
     return "${local.year}-${local.month.number}-${local.dayOfMonth}"
 }
 
