@@ -12,6 +12,7 @@ fun initKoin(
 ): KoinApplication = startKoin {
     appDeclaration()
     modules(
+        platformModule,
         networkModule(baseUrl, isDebug),
         repositoryModule,
         useCaseModule,

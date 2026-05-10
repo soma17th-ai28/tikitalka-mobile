@@ -1,0 +1,396 @@
+package com.soma2026.tikitalka.ui.chat
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.soma2026.tikitalka.domain.model.ChatMessage
+import com.soma2026.tikitalka.domain.model.MessageRole
+import com.soma2026.tikitalka.presentation.chat.ChatEffect
+import com.soma2026.tikitalka.presentation.chat.ChatIntent
+import com.soma2026.tikitalka.presentation.chat.ChatState
+import com.soma2026.tikitalka.presentation.chat.ChatViewModel
+import com.soma2026.tikitalka.ui.theme.TikiTalkaTheme
+import org.koin.compose.viewmodel.koinViewModel
+
+@Composable
+fun ChatScreen(
+    viewModel: ChatViewModel = koinViewModel(),
+) {
+    val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is ChatEffect.NavigateBack -> Unit
+                is ChatEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+            }
+        }
+    }
+
+    ChatContent(
+        state = state,
+        snackbarHostState = snackbarHostState,
+        onInputChange = { viewModel.handleIntent(ChatIntent.UpdateInput(it)) },
+        onSend = { viewModel.handleIntent(ChatIntent.SendMessage) },
+        onSuggestedQuestion = { viewModel.handleIntent(ChatIntent.SelectSuggestedQuestion(it)) },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ChatContent(
+    state: ChatState,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onInputChange: (String) -> Unit = {},
+    onSend: () -> Unit = {},
+    onSuggestedQuestion: (String) -> Unit = {},
+) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(state.messages.size, state.isSending) {
+        val targetIndex = if (state.isSending) state.messages.size else state.messages.size - 1
+        if (targetIndex >= 0) listState.animateScrollToItem(targetIndex)
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "티키타카",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
+            )
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data -> Snackbar(snackbarData = data) }
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .imePadding(),
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                when {
+                    state.isLoadingHistory -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                    state.messages.isEmpty() && !state.isSending -> {
+                        EmptyChatPlaceholder(modifier = Modifier.align(Alignment.Center))
+                    }
+                    else -> {
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            items(state.messages) { message ->
+                                MessageBubble(
+                                    message = message,
+                                    onSuggestedQuestion = onSuggestedQuestion,
+                                )
+                            }
+                            if (state.isSending) {
+                                item { ThinkingBubble() }
+                            }
+                        }
+                    }
+                }
+            }
+
+            ChatInputBar(
+                text = state.inputText,
+                isSending = state.isSending,
+                onTextChange = onInputChange,
+                onSend = onSend,
+            )
+        }
+    }
+}
+
+@Composable
+private fun MessageBubble(
+    message: ChatMessage,
+    onSuggestedQuestion: (String) -> Unit,
+) {
+    val isUser = message.role == MessageRole.USER
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = if (isUser) Alignment.End else Alignment.Start,
+    ) {
+        Box(
+            modifier = Modifier
+                .widthIn(max = 280.dp)
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 16.dp,
+                        topEnd = 16.dp,
+                        bottomStart = if (isUser) 16.dp else 4.dp,
+                        bottomEnd = if (isUser) 4.dp else 16.dp,
+                    ),
+                )
+                .background(
+                    if (isUser) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.surfaceVariant,
+                )
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+        ) {
+            Text(
+                text = message.content,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (isUser) MaterialTheme.colorScheme.onPrimary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        if (!isUser && message.suggestedQuestion != null) {
+            Spacer(modifier = Modifier.height(6.dp))
+            SuggestedQuestionChip(
+                text = message.suggestedQuestion,
+                onClick = { onSuggestedQuestion(message.suggestedQuestion) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThinkingBubble() {
+    Box(
+        modifier = Modifier
+            .clip(
+                RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp,
+                    bottomStart = 4.dp,
+                    bottomEnd = 16.dp,
+                ),
+            )
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(18.dp),
+            strokeWidth = 2.dp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun SuggestedQuestionChip(
+    text: String,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "💬", style = MaterialTheme.typography.labelSmall)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyChatPlaceholder(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(text = "⚽", style = MaterialTheme.typography.displaySmall)
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "AI와 축구 이야기를\n나눠보세요!",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun ChatInputBar(
+    text: String,
+    isSending: Boolean,
+    onTextChange: (String) -> Unit,
+    onSend: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 8.dp,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.Bottom,
+        ) {
+            TextField(
+                value = text,
+                onValueChange = onTextChange,
+                modifier = Modifier.weight(1f),
+                placeholder = {
+                    Text(
+                        text = "메시지를 입력하세요...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                shape = RoundedCornerShape(24.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                ),
+                maxLines = 4,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                keyboardActions = KeyboardActions(onSend = { onSend() }),
+                textStyle = MaterialTheme.typography.bodyMedium,
+                enabled = !isSending,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (text.isNotBlank() && !isSending) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.surfaceVariant,
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                IconButton(
+                    onClick = onSend,
+                    enabled = text.isNotBlank() && !isSending,
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Send,
+                        contentDescription = "전송",
+                        tint = if (text.isNotBlank() && !isSending) MaterialTheme.colorScheme.onPrimary
+                               else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+}
+
+// region Preview
+
+private val previewMessages = listOf(
+    ChatMessage(role = MessageRole.USER, content = "음바페가 진짜 파리로 돌아갈 것 같아요?", suggestedQuestion = null, createdAt = ""),
+    ChatMessage(
+        role = MessageRole.ASSISTANT,
+        content = "현재 여러 매체에서 파리 복귀 가능성을 보도하고 있습니다. 레알 마드리드와의 불화설이 지속되는 가운데, 이적에 열린 태도를 보이고 있다는 소식도 있습니다.",
+        suggestedQuestion = "레알 마드리드와 어떤 불화가 있었나요?",
+        createdAt = "",
+    ),
+    ChatMessage(role = MessageRole.USER, content = "이적료는 얼마나 될까요?", suggestedQuestion = null, createdAt = ""),
+)
+
+@Preview
+@Composable
+private fun ChatContentPreview() {
+    TikiTalkaTheme {
+        ChatContent(state = ChatState(messages = previewMessages))
+    }
+}
+
+@Preview
+@Composable
+private fun ChatContentDarkPreview() {
+    TikiTalkaTheme(darkTheme = true) {
+        ChatContent(state = ChatState(messages = previewMessages))
+    }
+}
+
+@Preview
+@Composable
+private fun ChatContentEmptyPreview() {
+    TikiTalkaTheme {
+        ChatContent(state = ChatState())
+    }
+}
+
+@Preview
+@Composable
+private fun ChatContentSendingPreview() {
+    TikiTalkaTheme {
+        ChatContent(state = ChatState(messages = previewMessages, isSending = true))
+    }
+}
+
+// endregion
