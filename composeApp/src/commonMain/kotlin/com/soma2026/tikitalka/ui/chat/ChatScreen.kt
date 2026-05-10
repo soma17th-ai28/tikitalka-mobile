@@ -1,11 +1,11 @@
 package com.soma2026.tikitalka.ui.chat
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -81,6 +81,7 @@ fun ChatScreen(
         snackbarHostState = snackbarHostState,
         onInputChange = { viewModel.handleIntent(ChatIntent.UpdateInput(it)) },
         onSend = { viewModel.handleIntent(ChatIntent.SendMessage) },
+        onSuggestedQuestionClick = { viewModel.handleIntent(ChatIntent.SelectSuggestedQuestion(it)) },
     )
 }
 
@@ -91,6 +92,7 @@ internal fun ChatContent(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onInputChange: (String) -> Unit = {},
     onSend: () -> Unit = {},
+    onSuggestedQuestionClick: (String) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
 
@@ -104,7 +106,7 @@ internal fun ChatContent(
             TopAppBar(
                 title = {
                     Text(
-                        text = "티키AI",
+                        text = "티키 AI",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -141,7 +143,10 @@ internal fun ChatContent(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             items(state.messages) { message ->
-                                MessageBubble(message = message)
+                                MessageBubble(
+                                    message = message,
+                                    onSuggestedQuestionClick = onSuggestedQuestionClick,
+                                )
                             }
                             if (state.isSending) {
                                 item { ThinkingBubble() }
@@ -162,14 +167,18 @@ internal fun ChatContent(
 }
 
 @Composable
-private fun MessageBubble(message: ChatMessage) {
+private fun MessageBubble(
+    message: ChatMessage,
+    onSuggestedQuestionClick: (String) -> Unit = {},
+) {
     val isUser = message.role == MessageRole.USER
 
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = if (isUser) Alignment.End else Alignment.Start,
     ) {
-        Box(
+        val suggestedQuestion = message.suggestedQuestion
+        Column(
             modifier = Modifier
                 .widthIn(max = 280.dp)
                 .clip(
@@ -192,7 +201,38 @@ private fun MessageBubble(message: ChatMessage) {
                 color = if (isUser) MaterialTheme.colorScheme.onPrimary
                         else MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (!isUser && suggestedQuestion != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                SuggestedQuestionChip(
+                    question = suggestedQuestion,
+                    onClick = { onSuggestedQuestionClick(suggestedQuestion) },
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun SuggestedQuestionChip(
+    question: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+    ) {
+        Text(
+            text = question,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

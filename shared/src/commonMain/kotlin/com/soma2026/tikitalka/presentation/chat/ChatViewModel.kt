@@ -41,6 +41,7 @@ class ChatViewModel(
         when (intent) {
             is ChatIntent.UpdateInput -> _state.update { it.copy(inputText = intent.text) }
             is ChatIntent.SendMessage -> sendMessage()
+            is ChatIntent.SelectSuggestedQuestion -> sendMessage(intent.question)
         }
     }
 
@@ -64,8 +65,8 @@ class ChatViewModel(
         }
     }
 
-    private fun sendMessage() {
-        val text = _state.value.inputText.trim()
+    private fun sendMessage(overrideText: String? = null) {
+        val text = (overrideText ?: _state.value.inputText).trim()
         if (text.isBlank() || _state.value.isSending) return
 
         val userMessage = ChatMessage(
