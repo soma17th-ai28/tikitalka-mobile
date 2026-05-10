@@ -8,6 +8,7 @@ class AndroidDeviceIdRepository(
     private val context: Context,
 ) : DeviceIdRepository {
 
-    override fun getDeviceId(): String =
+    override suspend fun getDeviceId(): String =
         Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+            ?: java.util.UUID.randomUUID().toString()
 }

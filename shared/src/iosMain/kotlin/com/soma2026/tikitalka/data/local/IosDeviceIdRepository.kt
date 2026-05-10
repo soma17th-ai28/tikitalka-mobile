@@ -5,6 +5,7 @@ import platform.UIKit.UIDevice
 
 class IosDeviceIdRepository : DeviceIdRepository {
 
-    override fun getDeviceId(): String =
-        UIDevice.currentDevice.identifierForVendor?.UUIDString ?: "unknown_device"
+    override suspend fun getDeviceId(): String =
+        UIDevice.currentDevice.identifierForVendor?.UUIDString
+            ?: platform.Foundation.NSUUID().UUIDString
 }

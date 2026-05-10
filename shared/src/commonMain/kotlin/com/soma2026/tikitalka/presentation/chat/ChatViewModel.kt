@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 
 class ChatViewModel(
     private val sendChatMessage: SendChatMessageUseCase,
@@ -21,7 +22,7 @@ class ChatViewModel(
     private val getDeviceId: GetDeviceIdUseCase,
 ) : ViewModel() {
 
-    private val deviceId: String by lazy { getDeviceId() }
+    private var deviceId: String = ""
 
     private val _state = MutableStateFlow(ChatState())
     val state: StateFlow<ChatState> = _state.asStateFlow()
@@ -30,12 +31,14 @@ class ChatViewModel(
     val effect = _effect.receiveAsFlow()
 
     init {
-        handleIntent(ChatIntent.LoadHistory)
+        viewModelScope.launch {
+            deviceId = getDeviceId()
+            loadHistory()
+        }
     }
 
     fun handleIntent(intent: ChatIntent) {
         when (intent) {
-            is ChatIntent.LoadHistory -> loadHistory()
             is ChatIntent.UpdateInput -> _state.update { it.copy(inputText = intent.text) }
             is ChatIntent.SendMessage -> sendMessage()
         }
@@ -46,10 +49,17 @@ class ChatViewModel(
             _state.update { it.copy(isLoadingHistory = true) }
             getChatHistory(deviceId)
                 .onSuccess { messages ->
-                    _state.update { it.copy(messages = messages, isLoadingHistory = false) }
+                    _state.update { state ->
+                        if (state.messages.isEmpty()) {
+                            state.copy(messages = messages, isLoadingHistory = false)
+                        } else {
+                            state.copy(isLoadingHistory = false)
+                        }
+                    }
                 }
-                .onFailure {
+                .onFailure { error ->
                     _state.update { it.copy(isLoadingHistory = false) }
+                    _effect.send(ChatEffect.ShowError(error.message ?: "대화 이력을 불러오지 못했습니다"))
                 }
         }
     }
@@ -62,7 +72,7 @@ class ChatViewModel(
             role = MessageRole.USER,
             content = text,
             suggestedQuestion = null,
-            createdAt = "",
+            createdAt = Clock.System.now().toString(),
         )
 
         _state.update {
