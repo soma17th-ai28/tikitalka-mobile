@@ -5,4 +5,4 @@ import com.soma2026.tikitalka.di.initKoin
 
 fun MainViewController() = ComposeUIViewController { App() }
 
-fun initKoinIos(baseUrl: String) = initKoin(baseUrl = baseUrl)
+fun startKoinIos(baseUrl: String) = initKoin(baseUrl = baseUrl)
