@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +29,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -69,6 +71,9 @@ fun DashboardScreen(
         onIssueClick = { issueId ->
             viewModel.handleIntent(DashboardIntent.SelectIssue(issueId))
         },
+        onLoadMore = {
+            viewModel.handleIntent(DashboardIntent.LoadMore)
+        },
     )
 }
 
@@ -78,6 +83,7 @@ internal fun DashboardContent(
     state: DashboardState,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onIssueClick: (issueId: String) -> Unit,
+    onLoadMore: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -127,7 +133,22 @@ internal fun DashboardContent(
                     )
                 }
                 else -> {
+                    val listState = rememberLazyListState()
+
+                    val reachedEnd by remember {
+                        derivedStateOf {
+                            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+                            val total = listState.layoutInfo.totalItemsCount
+                            lastVisible != null && lastVisible.index >= total - 3
+                        }
+                    }
+
+                    LaunchedEffect(reachedEnd) {
+                        if (reachedEnd && !state.isLastPage) onLoadMore()
+                    }
+
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
@@ -137,6 +158,18 @@ internal fun DashboardContent(
                                 issue = issue,
                                 onClick = { onIssueClick(issue.id) },
                             )
+                        }
+                        if (state.isLoadingMore) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
                         }
                         item { Spacer(modifier = Modifier.height(8.dp)) }
                     }

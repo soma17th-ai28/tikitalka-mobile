@@ -28,6 +28,7 @@ class DashboardViewModel(
     fun handleIntent(intent: DashboardIntent) {
         when (intent) {
             is DashboardIntent.LoadIssues -> loadIssues()
+            is DashboardIntent.LoadMore -> loadMore()
             is DashboardIntent.SelectIssue -> navigateToChat(intent.issueId)
             is DashboardIntent.Refresh -> loadIssues()
         }
@@ -36,14 +37,46 @@ class DashboardViewModel(
     private fun loadIssues() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
-            getIssues()
+            getIssues(page = 0)
                 .onSuccess { paged ->
-                    _state.update { it.copy(issues = paged.content, isLoading = false, errorMessage = null) }
+                    _state.update {
+                        it.copy(
+                            issues = paged.content,
+                            isLoading = false,
+                            errorMessage = null,
+                            currentPage = paged.page,
+                            isLastPage = paged.page >= paged.totalPages - 1,
+                        )
+                    }
                 }
                 .onFailure { error ->
                     val message = error.message ?: "알 수 없는 오류"
                     _state.update { it.copy(isLoading = false, errorMessage = message) }
                     _effect.send(DashboardEffect.ShowError(message))
+                }
+        }
+    }
+
+    private fun loadMore() {
+        val current = _state.value
+        if (current.isLoadingMore || current.isLastPage) return
+
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingMore = true) }
+            getIssues(page = current.currentPage + 1)
+                .onSuccess { paged ->
+                    _state.update {
+                        it.copy(
+                            issues = it.issues + paged.content,
+                            isLoadingMore = false,
+                            currentPage = paged.page,
+                            isLastPage = paged.page >= paged.totalPages - 1,
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _state.update { it.copy(isLoadingMore = false) }
+                    _effect.send(DashboardEffect.ShowError(error.message ?: "알 수 없는 오류"))
                 }
         }
     }
