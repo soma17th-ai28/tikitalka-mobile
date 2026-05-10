@@ -1,16 +1,16 @@
 package com.soma2026.tikitalka.app
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.soma2026.tikitalka.navigation.Screen
 import com.soma2026.tikitalka.ui.dashboard.DashboardScreen
+import com.soma2026.tikitalka.ui.theme.TikiTalkaTheme
 
 @Composable
 fun App() {
-    MaterialTheme {
+    TikiTalkaTheme {
         val navController = rememberNavController()
 
         NavHost(
