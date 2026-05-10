@@ -2,17 +2,20 @@ package com.soma2026.tikitalka.app
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.Icon
+import org.jetbrains.compose.resources.painterResource
+import tikitalka.composeapp.generated.resources.Res
+import tikitalka.composeapp.generated.resources.ico_bot_fs_chatbot
+import tikitalka.composeapp.generated.resources.ico_bot_fs_feed
+import tikitalka.composeapp.generated.resources.ico_bot_ts_chatbot
+import tikitalka.composeapp.generated.resources.ico_bot_ts_feed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -37,8 +40,12 @@ fun App() {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
-        Column(modifier = Modifier.fillMaxSize().imePadding()) {
-            Box(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .consumeWindowInsets(WindowInsets(bottom = 72.dp)),
+            ) {
                 NavHost(
                     navController = navController,
                     startDestination = Screen.Dashboard.route,
@@ -53,7 +60,7 @@ fun App() {
             }
 
             NavigationBar(
-                modifier = Modifier.height(56.dp),
+                modifier = Modifier.height(72.dp),
                 containerColor = MaterialTheme.colorScheme.surface,
                 tonalElevation = 0.dp,
             ) {
@@ -79,7 +86,8 @@ fun App() {
                     },
                     icon = {
                         Icon(
-                            imageVector = if (isDashboard) Icons.Filled.Home else Icons.Outlined.Home,
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(if (isDashboard) Res.drawable.ico_bot_ts_feed else Res.drawable.ico_bot_fs_feed),
                             contentDescription = "피드",
                         )
                     },
@@ -97,7 +105,8 @@ fun App() {
                     },
                     icon = {
                         Icon(
-                            imageVector = if (isChat) Icons.Filled.Email else Icons.Outlined.Email,
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(if (isChat) Res.drawable.ico_bot_ts_chatbot else Res.drawable.ico_bot_fs_chatbot),
                             contentDescription = "채팅",
                         )
                     },
