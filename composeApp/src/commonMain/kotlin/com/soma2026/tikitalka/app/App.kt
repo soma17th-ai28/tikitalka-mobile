@@ -7,29 +7,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.soma2026.tikitalka.navigation.Screen
 import com.soma2026.tikitalka.ui.dashboard.DashboardScreen
-import com.soma2026.tikitalka.di.appModule
-import org.koin.compose.KoinContext
 
 @Composable
 fun App() {
-    KoinContext {
-        MaterialTheme {
-            val navController = rememberNavController()
+    MaterialTheme {
+        val navController = rememberNavController()
 
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Dashboard.route,
-            ) {
-                composable(Screen.Dashboard.route) {
-                    DashboardScreen(
-                        onNavigateToChat = { issueId ->
-                            navController.navigate(Screen.Chat.createRoute(issueId))
-                        },
-                    )
-                }
-                composable(Screen.Chat.route) {
-                    // TODO: #6 Chat UI
-                }
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Dashboard.route,
+        ) {
+            composable(Screen.Dashboard.route) {
+                DashboardScreen(
+                    onNavigateToChat = { issueId ->
+                        navController.navigate(Screen.Chat.createRoute(issueId))
+                    },
+                )
+            }
+            composable(Screen.Chat.route) {
+                // TODO: #6 Chat UI
             }
         }
     }
