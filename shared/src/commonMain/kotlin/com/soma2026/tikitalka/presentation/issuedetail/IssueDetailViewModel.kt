@@ -2,6 +2,8 @@ package com.soma2026.tikitalka.presentation.issuedetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.soma2026.tikitalka.domain.service.TranslationLanguage
+import com.soma2026.tikitalka.domain.service.TranslationService
 import com.soma2026.tikitalka.domain.usecase.GetIssueDetailUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +15,7 @@ import kotlinx.coroutines.launch
 
 class IssueDetailViewModel(
     private val getIssueDetail: GetIssueDetailUseCase,
+    private val translationService: TranslationService,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(IssueDetailState())
@@ -41,6 +44,27 @@ class IssueDetailViewModel(
             is IssueDetailIntent.NavigateBack -> {
                 viewModelScope.launch { _effect.send(IssueDetailEffect.NavigateBack) }
             }
+            is IssueDetailIntent.SelectLanguage -> selectLanguage(intent.language)
+        }
+    }
+
+    private fun selectLanguage(language: TranslationLanguage) {
+        if (_state.value.selectedLanguage == language) return
+        _state.update { it.copy(selectedLanguage = language, translatedContent = null) }
+
+        if (language == TranslationLanguage.KOREAN) return
+
+        val content = _state.value.issue?.originalContent ?: return
+        viewModelScope.launch {
+            _state.update { it.copy(isTranslating = true) }
+            translationService.translate(content, language)
+                .onSuccess { translated ->
+                    _state.update { it.copy(translatedContent = translated, isTranslating = false) }
+                }
+                .onFailure { error ->
+                    _state.update { it.copy(isTranslating = false) }
+                    _effect.send(IssueDetailEffect.ShowError(error.message ?: "번역에 실패했습니다"))
+                }
         }
     }
 }

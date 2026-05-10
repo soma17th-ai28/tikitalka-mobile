@@ -1,15 +1,20 @@
 package com.soma2026.tikitalka.ui.issuedetail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -18,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.soma2026.tikitalka.domain.model.Issue
+import com.soma2026.tikitalka.domain.service.TranslationLanguage
 import com.soma2026.tikitalka.presentation.issuedetail.IssueDetailEffect
 import com.soma2026.tikitalka.presentation.issuedetail.IssueDetailIntent
 import com.soma2026.tikitalka.presentation.issuedetail.IssueDetailState
@@ -65,6 +70,7 @@ fun IssueDetailScreen(
     IssueDetailContent(
         state = state,
         onBack = { viewModel.handleIntent(IssueDetailIntent.NavigateBack) },
+        onSelectLanguage = { viewModel.handleIntent(IssueDetailIntent.SelectLanguage(it)) },
     )
 }
 
@@ -73,6 +79,7 @@ fun IssueDetailScreen(
 internal fun IssueDetailContent(
     state: IssueDetailState,
     onBack: () -> Unit = {},
+    onSelectLanguage: (TranslationLanguage) -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -93,9 +100,10 @@ internal fun IssueDetailContent(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                    ),
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -124,7 +132,13 @@ internal fun IssueDetailContent(
                 }
 
                 state.issue != null -> {
-                    IssueDetailBody(issue = state.issue!!)
+                    IssueDetailBody(
+                        issue = state.issue!!,
+                        selectedLanguage = state.selectedLanguage,
+                        translatedContent = state.translatedContent,
+                        isTranslating = state.isTranslating,
+                        onSelectLanguage = onSelectLanguage,
+                    )
                 }
             }
         }
@@ -132,7 +146,13 @@ internal fun IssueDetailContent(
 }
 
 @Composable
-private fun IssueDetailBody(issue: Issue) {
+private fun IssueDetailBody(
+    issue: Issue,
+    selectedLanguage: TranslationLanguage,
+    translatedContent: String?,
+    isTranslating: Boolean,
+    onSelectLanguage: (TranslationLanguage) -> Unit,
+) {
     Column(
         modifier =
             Modifier
@@ -187,21 +207,81 @@ private fun IssueDetailBody(issue: Issue) {
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 본문
-            Text(
-                text = "본문",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = issue.originalContent ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+            // 본문 헤더 + 언어 토글
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "본문",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                LanguageToggle(
+                    selected = selectedLanguage,
+                    onSelect = onSelectLanguage,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (isTranslating) {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                }
+            } else {
+                Text(
+                    text = translatedContent ?: issue.originalContent ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+    }
+}
+
+@Composable
+private fun LanguageToggle(
+    selected: TranslationLanguage,
+    onSelect: (TranslationLanguage) -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        TranslationLanguage.entries.forEach { language ->
+            val isSelected = selected == language
+            Box(
+                modifier =
+                    Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(
+                            if (isSelected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.surfaceVariant
+                            },
+                        ).clickable { onSelect(language) }
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = language.label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color =
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                )
+            }
+        }
     }
 }
 
