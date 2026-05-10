@@ -316,7 +316,7 @@ private fun SuggestedQuestionChip(
     Box(
         modifier =
             Modifier
-                .clip(RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
                 .clickable(onClick = onClick)
                 .padding(horizontal = 12.dp, vertical = 6.dp),
