@@ -3,6 +3,7 @@ package com.soma2026.tikitalka.di
 import com.soma2026.tikitalka.data.remote.api.ChatApi
 import com.soma2026.tikitalka.data.remote.api.IssueApi
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
@@ -16,6 +17,10 @@ import org.koin.dsl.module
 fun networkModule(baseUrl: String, isDebug: Boolean = false) = module {
     single {
         HttpClient {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 90_000
+                connectTimeoutMillis = 10_000
+            }
             install(ContentNegotiation) {
                 json(
                     Json {
