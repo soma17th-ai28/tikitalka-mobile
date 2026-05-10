@@ -39,6 +39,7 @@ import com.soma2026.tikitalka.presentation.dashboard.DashboardIntent
 import com.soma2026.tikitalka.presentation.dashboard.DashboardState
 import com.soma2026.tikitalka.presentation.dashboard.DashboardViewModel
 import com.soma2026.tikitalka.ui.theme.TikiTalkaTheme
+import com.soma2026.tikitalka.ui.util.toRelativeTimeString
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -164,7 +165,7 @@ private fun IssueCard(
                 ) {
                     TagBadge(tag = issue.tag)
                     Text(
-                        text = issue.publishedAt,
+                        text = issue.publishedAt.toRelativeTimeString(),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -206,7 +207,7 @@ private fun IssueCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        text = "요약 보기 →",
+                        text = "읽어 보기 →",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -241,7 +242,7 @@ private val previewIssues = listOf(
         title = "음바페, 레알 마드리드와 결별설... 파리 복귀 가능성 제기",
         summary = "음바페가 레알 마드리드와의 불화설이 계속되는 가운데, 프랑스 현지 매체들이 파리 생제르맹 복귀 가능성을 연이어 보도하고 있다.",
         tag = "TRANSFER",
-        publishedAt = "2시간 전",
+        publishedAt = "2025-05-10T08:00:00Z",
         hotnessScore = 98,
         url = "",
         source = "L'Equipe",
@@ -251,7 +252,7 @@ private val previewIssues = listOf(
         title = "손흥민, 토트넘 잔류 확정... 새 계약 서명 임박",
         summary = "손흥민이 토트넘 홋스퍼와 새 계약 협상을 마무리하며 잔류가 사실상 확정됐다. 계약 기간은 2년으로 알려졌다.",
         tag = "CONTRACT",
-        publishedAt = "5시간 전",
+        publishedAt = "2025-05-09T18:00:00Z",
         hotnessScore = 91,
         url = "",
         source = "The Athletic",
@@ -261,7 +262,7 @@ private val previewIssues = listOf(
         title = "챔피언스리그 8강 대진 확정... 레알 vs 맨시티 빅매치 성사",
         summary = "UEFA 챔피언스리그 8강 대진 추첨 결과, 레알 마드리드와 맨체스터 시티가 맞대결을 펼치게 됐다.",
         tag = "UCL",
-        publishedAt = "1일 전",
+        publishedAt = "2025-05-09T06:00:00Z",
         hotnessScore = 85,
         url = "",
         source = "UEFA",
