@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 class ChatViewModel(
     private val sendChatMessage: SendChatMessageUseCase,
@@ -41,6 +43,7 @@ class ChatViewModel(
         when (intent) {
             is ChatIntent.UpdateInput -> _state.update { it.copy(inputText = intent.text) }
             is ChatIntent.SendMessage -> sendMessage()
+            is ChatIntent.SelectSuggestedQuestion -> sendMessage(intent.question)
         }
     }
 
@@ -64,15 +67,15 @@ class ChatViewModel(
         }
     }
 
-    private fun sendMessage() {
-        val text = _state.value.inputText.trim()
+    private fun sendMessage(overrideText: String? = null) {
+        val text = (overrideText ?: _state.value.inputText).trim()
         if (text.isBlank() || _state.value.isSending) return
 
         val userMessage = ChatMessage(
             role = MessageRole.USER,
             content = text,
             suggestedQuestion = null,
-            createdAt = Clock.System.now().toString(),
+            createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
         )
 
         _state.update {
