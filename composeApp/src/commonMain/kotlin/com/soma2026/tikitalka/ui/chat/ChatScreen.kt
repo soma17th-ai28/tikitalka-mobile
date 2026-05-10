@@ -108,7 +108,7 @@ internal fun ChatContent(
             TopAppBar(
                 title = {
                     Text(
-                        text = "티키 AI",
+                        text = "티키 ChatBot",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
