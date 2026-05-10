@@ -88,7 +88,7 @@ internal fun DashboardContent(
             TopAppBar(
                 title = {
                     Text(
-                        text = "TikiTalka",
+                        text = "티키 News",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -236,7 +236,7 @@ private fun IssueCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = issue.source,
+                        text = if (issue.source.length > 30) issue.source.take(30) + "…" else issue.source,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
