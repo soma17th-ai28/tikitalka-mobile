@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.soma2026.tikitalka.domain.service.TranslationLanguage
 import com.soma2026.tikitalka.domain.service.TranslationService
 import com.soma2026.tikitalka.domain.usecase.GetIssueDetailUseCase
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +24,8 @@ class IssueDetailViewModel(
 
     private val _effect = Channel<IssueDetailEffect>(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
+
+    private var translationJob: Job? = null
 
     fun load(id: String) {
         viewModelScope.launch {
@@ -50,16 +53,19 @@ class IssueDetailViewModel(
 
     private fun selectLanguage(language: TranslationLanguage) {
         if (_state.value.selectedLanguage == language) return
-        _state.update { it.copy(selectedLanguage = language, translatedContent = null) }
+        translationJob?.cancel()
+        _state.update { it.copy(selectedLanguage = language, translatedContent = null, isTranslating = false) }
 
         if (language == TranslationLanguage.ENGLISH) return
 
         val content = _state.value.issue?.originalContent ?: return
-        viewModelScope.launch {
+        translationJob = viewModelScope.launch {
             _state.update { it.copy(isTranslating = true) }
             translationService.translate(content, language)
                 .onSuccess { translated ->
-                    _state.update { it.copy(translatedContent = translated, isTranslating = false) }
+                    if (_state.value.selectedLanguage == language) {
+                        _state.update { it.copy(translatedContent = translated, isTranslating = false) }
+                    }
                 }
                 .onFailure { error ->
                     _state.update { it.copy(isTranslating = false) }

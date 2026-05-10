@@ -31,16 +31,16 @@ class AndroidTranslationService : TranslationService {
                     translator.translate(text)
                         .addOnSuccessListener { translated ->
                             translator.close()
-                            cont.resume(Result.success(translated))
+                            if (cont.isActive) cont.resume(Result.success(translated))
                         }
                         .addOnFailureListener { e ->
                             translator.close()
-                            cont.resume(Result.failure(e))
+                            if (cont.isActive) cont.resume(Result.failure(e))
                         }
                 }
                 .addOnFailureListener { e ->
                     translator.close()
-                    cont.resume(Result.failure(e))
+                    if (cont.isActive) cont.resume(Result.failure(e))
                 }
 
             cont.invokeOnCancellation { translator.close() }
