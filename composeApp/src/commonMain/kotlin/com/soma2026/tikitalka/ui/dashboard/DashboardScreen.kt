@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,6 +48,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun DashboardScreen(
+    onNavigateToDetail: (String) -> Unit = {},
     viewModel: DashboardViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -58,7 +57,7 @@ fun DashboardScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is DashboardEffect.NavigateToChat -> snackbarHostState.showSnackbar("아직 구현되지 않은 기능입니다") // TODO: #6 Chat UI
+                is DashboardEffect.NavigateToDetail -> onNavigateToDetail(effect.issueId)
                 is DashboardEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
             }
         }
@@ -89,7 +88,7 @@ internal fun DashboardContent(
             TopAppBar(
                 title = {
                     Text(
-                        text = "TikiTalka",
+                        text = "티키 News",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -192,24 +191,7 @@ private fun IssueCard(
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 2.dp,
     ) {
-        Column {
-            // 썸네일 플레이스홀더
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .clip(MaterialTheme.shapes.medium)
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.primaryContainer,
-                            ),
-                        ),
-                    ),
-            )
-
-            Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp)) {
                 // 태그 + 시간
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -254,7 +236,7 @@ private fun IssueCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = issue.source,
+                        text = if (issue.source.length > 30) issue.source.take(30) + "…" else issue.source,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -264,7 +246,6 @@ private fun IssueCard(
                         color = MaterialTheme.colorScheme.primary,
                     )
                 }
-            }
         }
     }
 }

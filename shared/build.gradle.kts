@@ -38,6 +38,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.ktor.client.android)
             implementation(libs.koin.android)
+            implementation(libs.mlkit.translate)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

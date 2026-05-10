@@ -29,7 +29,7 @@ class DashboardViewModel(
         when (intent) {
             is DashboardIntent.LoadIssues -> loadIssues()
             is DashboardIntent.LoadMore -> loadMore()
-            is DashboardIntent.SelectIssue -> navigateToChat(intent.issueId)
+            is DashboardIntent.SelectIssue -> navigateToDetail(intent.issueId)
             is DashboardIntent.Refresh -> loadIssues()
         }
     }
@@ -81,9 +81,9 @@ class DashboardViewModel(
         }
     }
 
-    private fun navigateToChat(issueId: String) {
+    private fun navigateToDetail(issueId: String) {
         viewModelScope.launch {
-            _effect.send(DashboardEffect.NavigateToChat(issueId))
+            _effect.send(DashboardEffect.NavigateToDetail(issueId))
         }
     }
 }
