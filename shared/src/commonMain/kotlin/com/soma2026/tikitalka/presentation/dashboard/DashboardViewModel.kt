@@ -38,11 +38,12 @@ class DashboardViewModel(
             _state.update { it.copy(isLoading = true, errorMessage = null) }
             getIssues()
                 .onSuccess { paged ->
-                    _state.update { it.copy(issues = paged.content, isLoading = false) }
+                    _state.update { it.copy(issues = paged.content, isLoading = false, errorMessage = null) }
                 }
                 .onFailure { error ->
-                    _state.update { it.copy(isLoading = false) }
-                    _effect.send(DashboardEffect.ShowError(error.message ?: "알 수 없는 오류"))
+                    val message = error.message ?: "알 수 없는 오류"
+                    _state.update { it.copy(isLoading = false, errorMessage = message) }
+                    _effect.send(DashboardEffect.ShowError(message))
                 }
         }
     }

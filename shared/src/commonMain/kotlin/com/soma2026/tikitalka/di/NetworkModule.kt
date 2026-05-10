@@ -13,7 +13,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
-fun networkModule(baseUrl: String) = module {
+fun networkModule(baseUrl: String, isDebug: Boolean = false) = module {
     single {
         HttpClient {
             install(ContentNegotiation) {
@@ -24,13 +24,15 @@ fun networkModule(baseUrl: String) = module {
                     },
                 )
             }
-            install(Logging) {
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        println("Ktor: $message")
+            if (isDebug) {
+                install(Logging) {
+                    logger = object : Logger {
+                        override fun log(message: String) {
+                            println("Ktor: $message")
+                        }
                     }
+                    level = LogLevel.BODY
                 }
-                level = LogLevel.BODY
             }
             defaultRequest {
                 url(baseUrl)

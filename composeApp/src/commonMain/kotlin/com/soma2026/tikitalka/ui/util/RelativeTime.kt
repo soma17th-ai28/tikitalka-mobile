@@ -14,7 +14,7 @@ fun String.toRelativeTimeString(): String {
     return try {
         val instant = Instant.parse(this)
         val now = Clock.System.now()
-        val seconds = (now - instant).inWholeSeconds
+        val seconds = (now - instant).inWholeSeconds.coerceAtLeast(0)
 
         when {
             seconds < 60       -> "방금 전"

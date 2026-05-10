@@ -10,6 +10,7 @@ class TikiTalkaApp : Application() {
         super.onCreate()
         initKoin(
             baseUrl = BuildConfig.BASE_URL,
+            isDebug = BuildConfig.DEBUG,
             extraModules = listOf(appModule),
         ) {
             androidContext(this@TikiTalkaApp)

@@ -6,12 +6,13 @@ import org.koin.core.module.Module
 
 fun initKoin(
     baseUrl: String,
+    isDebug: Boolean = false,
     extraModules: List<Module> = emptyList(),
     appDeclaration: KoinApplication.() -> Unit = {},
 ): KoinApplication = startKoin {
     appDeclaration()
     modules(
-        networkModule(baseUrl),
+        networkModule(baseUrl, isDebug),
         repositoryModule,
         useCaseModule,
         viewModelModule,

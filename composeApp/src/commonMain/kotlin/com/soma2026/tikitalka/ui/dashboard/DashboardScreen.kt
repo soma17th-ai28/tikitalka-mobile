@@ -18,6 +18,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -26,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,18 +52,20 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is DashboardEffect.NavigateToChat -> onNavigateToChat(effect.issueId)
-                is DashboardEffect.ShowError -> { /* TODO: 스낵바 */ }
+                is DashboardEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
             }
         }
     }
 
     DashboardContent(
         state = state,
+        snackbarHostState = snackbarHostState,
         onIssueClick = { issueId ->
             viewModel.handleIntent(DashboardIntent.SelectIssue(issueId))
         },
@@ -70,6 +76,7 @@ fun DashboardScreen(
 @Composable
 internal fun DashboardContent(
     state: DashboardState,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onIssueClick: (issueId: String) -> Unit,
 ) {
     Scaffold(
@@ -87,6 +94,11 @@ internal fun DashboardContent(
                 ),
             )
         },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(snackbarData = data)
+            }
+        },
         containerColor = MaterialTheme.colorScheme.background,
     ) { innerPadding ->
         Box(
@@ -98,9 +110,17 @@ internal fun DashboardContent(
                 state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+                state.errorMessage != null -> {
+                    Text(
+                        text = "뉴스를 불러오지 못했습니다.",
+                        modifier = Modifier.align(Alignment.Center),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
                 state.issues.isEmpty() -> {
                     Text(
-                        text = "뉴스를 불러오는 중입니다...",
+                        text = "표시할 뉴스가 없습니다.",
                         modifier = Modifier.align(Alignment.Center),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
