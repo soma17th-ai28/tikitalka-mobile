@@ -32,6 +32,7 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.androidx.lifecycle.viewmodel)
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.android)

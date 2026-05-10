@@ -4,6 +4,11 @@
 해외 축구 이슈 요약 및 AI 챗봇 서비스의 모바일 클라이언트.
 화제성 높은 축구 뉴스를 큐레이션하고, AI와 실시간 티키타카(대화)를 제공하는 앱.
 
+## 디자인 참고
+- UI 디자인: `docs/TikiTalka.html` 참고
+- 피드 화면: 뉴스 카드 리스트만 구현 (기타 컴포넌트 생략)
+- 채팅 화면: 메시지 버블 UI 참고
+
 ## 기술 스택
 - **언어**: Kotlin
 - **멀티플랫폼**: KMP (Kotlin Multiplatform) + CMP (Compose Multiplatform)
