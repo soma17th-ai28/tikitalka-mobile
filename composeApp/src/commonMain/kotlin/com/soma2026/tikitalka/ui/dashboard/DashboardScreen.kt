@@ -16,9 +16,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,9 +36,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import com.soma2026.tikitalka.domain.model.Issue
 import com.soma2026.tikitalka.presentation.dashboard.DashboardEffect
 import com.soma2026.tikitalka.presentation.dashboard.DashboardIntent
+import com.soma2026.tikitalka.presentation.dashboard.DashboardState
 import com.soma2026.tikitalka.presentation.dashboard.DashboardViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -54,33 +60,142 @@ fun DashboardScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        when {
-            state.isLoading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-            else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0xFFF5F5F5)),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    item { Spacer(modifier = Modifier.height(8.dp)) }
-                    items(state.issues, key = { it.id }) { issue ->
-                        IssueCard(
-                            issue = issue,
-                            onClick = {
-                                viewModel.handleIntent(DashboardIntent.SelectIssue(issue.id))
-                            },
-                        )
+    DashboardContent(
+        state = state,
+        onIssueClick = { issueId ->
+            viewModel.handleIntent(DashboardIntent.SelectIssue(issueId))
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun DashboardContent(
+    state: DashboardState,
+    onIssueClick: (issueId: String) -> Unit,
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "TikiTalka",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF1565C0),
+                ),
+            )
+        },
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFF5F5F5))
+                .padding(innerPadding),
+        ) {
+            when {
+                state.isLoading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+                state.issues.isEmpty() -> {
+                    Text(
+                        text = "뉴스를 불러오는 중입니다...",
+                        modifier = Modifier.align(Alignment.Center),
+                        color = Color(0xFF9E9E9E),
+                    )
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        item { Spacer(modifier = Modifier.height(8.dp)) }
+                        items(state.issues, key = { it.id }) { issue ->
+                            IssueCard(
+                                issue = issue,
+                                onClick = { onIssueClick(issue.id) },
+                            )
+                        }
+                        item { Spacer(modifier = Modifier.height(8.dp)) }
                     }
-                    item { Spacer(modifier = Modifier.height(8.dp)) }
                 }
             }
         }
     }
 }
+
+// region Preview
+
+private val previewIssues = listOf(
+    Issue(
+        id = "1",
+        title = "음바페, 레알 마드리드와 결별설... 파리 복귀 가능성 제기",
+        summary = "음바페가 레알 마드리드와의 불화설이 계속되는 가운데, 프랑스 현지 매체들이 파리 생제르맹 복귀 가능성을 연이어 보도하고 있다.",
+        tag = "TRANSFER",
+        publishedAt = "2시간 전",
+        hotnessScore = 98,
+        url = "",
+        source = "L'Equipe",
+    ),
+    Issue(
+        id = "2",
+        title = "손흥민, 토트넘 잔류 확정... 새 계약 서명 임박",
+        summary = "손흥민이 토트넘 홋스퍼와 새 계약 협상을 마무리하며 잔류가 사실상 확정됐다. 계약 기간은 2년으로 알려졌다.",
+        tag = "CONTRACT",
+        publishedAt = "5시간 전",
+        hotnessScore = 91,
+        url = "",
+        source = "The Athletic",
+    ),
+    Issue(
+        id = "3",
+        title = "챔피언스리그 8강 대진 확정... 레알 vs 맨시티 빅매치 성사",
+        summary = "UEFA 챔피언스리그 8강 대진 추첨 결과, 레알 마드리드와 맨체스터 시티가 맞대결을 펼치게 됐다.",
+        tag = "UCL",
+        publishedAt = "1일 전",
+        hotnessScore = 85,
+        url = "",
+        source = "UEFA",
+    ),
+)
+
+@Preview
+@Composable
+private fun DashboardContentPreview() {
+    MaterialTheme {
+        DashboardContent(
+            state = DashboardState(issues = previewIssues),
+            onIssueClick = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DashboardContentLoadingPreview() {
+    MaterialTheme {
+        DashboardContent(
+            state = DashboardState(isLoading = true),
+            onIssueClick = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DashboardContentEmptyPreview() {
+    MaterialTheme {
+        DashboardContent(
+            state = DashboardState(),
+            onIssueClick = {},
+        )
+    }
+}
+
+// endregion
 
 @Composable
 private fun IssueCard(
