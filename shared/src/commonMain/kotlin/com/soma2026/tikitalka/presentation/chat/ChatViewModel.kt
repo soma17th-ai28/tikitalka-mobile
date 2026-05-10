@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 class ChatViewModel(
     private val sendChatMessage: SendChatMessageUseCase,
@@ -73,7 +75,7 @@ class ChatViewModel(
             role = MessageRole.USER,
             content = text,
             suggestedQuestion = null,
-            createdAt = Clock.System.now().toString(),
+            createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
         )
 
         _state.update {
