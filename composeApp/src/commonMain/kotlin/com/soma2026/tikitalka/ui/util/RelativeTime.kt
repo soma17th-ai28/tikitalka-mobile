@@ -1,7 +1,7 @@
 package com.soma2026.tikitalka.ui.util
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -16,14 +16,14 @@ import kotlinx.datetime.toInstant
  */
 fun String.toRelativeTimeString(): String {
     return try {
-        val instant = if (contains('Z') || contains('+')) {
-            Instant.parse(this)
+        val parsedEpochSeconds = if (contains('Z') || contains('+')) {
+            Instant.parse(this).epochSeconds
         } else {
-            LocalDateTime.parse(this).toInstant(TimeZone.UTC)
+            LocalDateTime.parse(this).toInstant(TimeZone.UTC).epochSeconds
         }
 
-        val now = Clock.System.now()
-        val seconds = (now - instant).inWholeSeconds.coerceAtLeast(0)
+        val nowEpochSeconds = Clock.System.now().epochSeconds
+        val seconds = (nowEpochSeconds - parsedEpochSeconds).coerceAtLeast(0)
 
         when {
             seconds < 60         -> "방금 전"

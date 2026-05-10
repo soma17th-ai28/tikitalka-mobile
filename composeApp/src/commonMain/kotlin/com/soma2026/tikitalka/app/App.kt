@@ -18,11 +18,7 @@ fun App() {
             startDestination = Screen.Dashboard.route,
         ) {
             composable(Screen.Dashboard.route) {
-                DashboardScreen(
-                    onNavigateToChat = { issueId ->
-                        navController.navigate(Screen.Chat.createRoute(issueId))
-                    },
-                )
+                DashboardScreen()
             }
             composable(Screen.Chat.route) {
                 // TODO: #6 Chat UI
