@@ -14,16 +14,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 class ChatViewModel(
     private val sendChatMessage: SendChatMessageUseCase,
     private val getChatHistory: GetChatHistoryUseCase,
     private val getDeviceId: GetDeviceIdUseCase,
 ) : ViewModel() {
-
     private var deviceId: String = ""
 
     private val _state = MutableStateFlow(ChatState())
@@ -59,8 +59,7 @@ class ChatViewModel(
                             state.copy(isLoadingHistory = false)
                         }
                     }
-                }
-                .onFailure { error ->
+                }.onFailure { error ->
                     _state.update { it.copy(isLoadingHistory = false) }
                     _effect.send(ChatEffect.ShowError(error.message ?: "대화 이력을 불러오지 못했습니다"))
                 }
@@ -71,22 +70,24 @@ class ChatViewModel(
         val text = (overrideText ?: _state.value.inputText).trim()
         if (text.isBlank() || _state.value.isSending) return
 
-        val userMessage = ChatMessage(
-            role = MessageRole.USER,
-            content = text,
-            suggestedQuestion = null,
-            createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
-        )
-
-        _state.update {
-            it.copy(
-                messages = it.messages + userMessage,
-                inputText = "",
-                isSending = true,
-            )
-        }
-
         viewModelScope.launch {
+            val now: Instant = Instant.fromEpochMilliseconds(Clock.System.now().toEpochMilliseconds())
+            val userMessage =
+                ChatMessage(
+                    role = MessageRole.USER,
+                    content = text,
+                    suggestedQuestion = null,
+                    createdAt = now.toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
+                )
+
+            _state.update {
+                it.copy(
+                    messages = it.messages + userMessage,
+                    inputText = "",
+                    isSending = true,
+                )
+            }
+
             sendChatMessage(deviceId, text)
                 .onSuccess { response ->
                     _state.update {
@@ -95,8 +96,7 @@ class ChatViewModel(
                             isSending = false,
                         )
                     }
-                }
-                .onFailure { error ->
+                }.onFailure { error ->
                     _state.update { it.copy(isSending = false) }
                     _effect.send(ChatEffect.ShowError(error.message ?: "메시지 전송에 실패했습니다"))
                 }
