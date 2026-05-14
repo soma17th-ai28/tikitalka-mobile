@@ -38,6 +38,7 @@ data class TableEntryDto(
 data class TeamDto(
     val name: String,
     val tla: String,
+    val crest: String = "",
 )
 
 fun StandingsResponseDto.toDomain(league: League): LeagueStandings {
@@ -54,8 +55,9 @@ fun StandingsResponseDto.toDomain(league: League): LeagueStandings {
 
 private fun TableEntryDto.toDomain() = TeamStanding(
     position = position,
-    teamName = team.name,
+    teamName = team.name.toKoreanTeamName(),
     tla = team.tla,
+    crestUrl = team.crest,
     playedGames = playedGames,
     won = won,
     lost = lost,
