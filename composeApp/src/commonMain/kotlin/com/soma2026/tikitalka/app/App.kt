@@ -18,12 +18,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
+import com.soma2026.tikitalka.navigation.IssueDetailRoute
 import com.soma2026.tikitalka.navigation.Screen
 import com.soma2026.tikitalka.ui.chat.ChatScreen
 import com.soma2026.tikitalka.ui.dashboard.DashboardScreen
@@ -42,7 +42,7 @@ fun App() {
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
-        val showNavBar = currentRoute != Screen.IssueDetail.route
+        val showNavBar = currentRoute == Screen.Dashboard.route || currentRoute == Screen.Chat.route
 
         Column(modifier = Modifier.fillMaxSize()) {
             val bottomInset = if (showNavBar) 72.dp else 0.dp
@@ -59,20 +59,17 @@ fun App() {
                     composable(Screen.Dashboard.route) {
                         DashboardScreen(
                             onNavigateToDetail = { issueId ->
-                                navController.navigate(Screen.IssueDetail.createRoute(issueId))
+                                navController.navigate(IssueDetailRoute(id = issueId))
                             },
                         )
                     }
                     composable(Screen.Chat.route) {
                         ChatScreen()
                     }
-                    composable(
-                        route = Screen.IssueDetail.route,
-                        arguments = listOf(navArgument("id") { type = NavType.StringType }),
-                    ) { backStackEntry ->
-                        val id = backStackEntry.arguments?.getString("id") ?: return@composable
+                    composable<IssueDetailRoute> { backStackEntry ->
+                        val route = backStackEntry.toRoute<IssueDetailRoute>()
                         IssueDetailScreen(
-                            issueId = id,
+                            issueId = route.id,
                             onNavigateBack = { navController.popBackStack() },
                         )
                     }
