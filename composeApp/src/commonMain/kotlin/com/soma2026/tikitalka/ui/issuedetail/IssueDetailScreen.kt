@@ -216,7 +216,8 @@ private fun IssueDetailBody(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        if (!issue.originalContent.isNullOrBlank()) {
+        val originalContent = issue.originalContent
+        if (!originalContent.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(20.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             Spacer(modifier = Modifier.height(20.dp))
@@ -238,7 +239,7 @@ private fun IssueDetailBody(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = " ${estimatedReadingMinutes(issue.originalContent!!)}분 읽기",
+                    text = " ${estimatedReadingMinutes(originalContent)}분 읽기",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -257,7 +258,7 @@ private fun IssueDetailBody(
                 }
             } else {
                 Text(
-                    text = translatedContent ?: issue.originalContent ?: "",
+                    text = translatedContent ?: originalContent,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
