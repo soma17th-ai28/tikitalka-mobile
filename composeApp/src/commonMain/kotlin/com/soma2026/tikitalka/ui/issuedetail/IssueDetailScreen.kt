@@ -2,6 +2,8 @@ package com.soma2026.tikitalka.ui.issuedetail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.SubcomposeAsyncImage
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -199,6 +201,33 @@ private fun IssueDetailBody(
             color = MaterialTheme.colorScheme.onSurface,
         )
 
+        if (!issue.imageUrl.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            SubcomposeAsyncImage(
+                model = issue.imageUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop,
+                loading = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                    )
+                },
+                error = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                    )
+                },
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
         HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
         Spacer(modifier = Modifier.height(16.dp))
@@ -341,6 +370,7 @@ private val previewIssue =
         hotnessScore = 98,
         url = "https://example.com/article",
         source = "L'Equipe",
+        imageUrl = "https://example.com/image.jpg",
         originalContent =
             "음바페는 지난 시즌 레알 마드리드에서 기대 이하의 성적을 기록했다. " +
                 "팀 내 불화설이 끊이지 않는 가운데 현지 매체들은 그의 파리 복귀 가능성을 잇달아 보도하고 있다. " +

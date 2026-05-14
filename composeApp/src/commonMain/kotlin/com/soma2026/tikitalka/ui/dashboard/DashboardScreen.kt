@@ -3,6 +3,8 @@ package com.soma2026.tikitalka.ui.dashboard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.SubcomposeAsyncImage
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -193,6 +195,31 @@ private fun IssueCard(
         color = if (isRead) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
         shadowElevation = if (isRead) 0.dp else 2.dp,
     ) {
+        Column {
+            if (!issue.imageUrl.isNullOrBlank()) {
+                SubcomposeAsyncImage(
+                    model = issue.imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    contentScale = ContentScale.Crop,
+                    loading = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                        )
+                    },
+                    error = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                        )
+                    },
+                )
+            }
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp)) {
                 // 태그 + 시간
                 Row(
@@ -248,6 +275,7 @@ private fun IssueCard(
                         color = if (isRead) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
                     )
                 }
+            }
         }
     }
 }
@@ -281,6 +309,7 @@ private val previewIssues = listOf(
         hotnessScore = 98,
         url = "",
         source = "L'Equipe",
+        imageUrl = "https://example.com/image.jpg",
     ),
     Issue(
         id = "2",
@@ -301,6 +330,7 @@ private val previewIssues = listOf(
         hotnessScore = 85,
         url = "",
         source = "UEFA",
+        imageUrl = "https://example.com/image2.jpg",
     ),
 )
 
