@@ -91,7 +91,7 @@ internal fun StandingsContent(
             Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
                 val standings = state.currentStandings
                 Text(
-                    text = if (standings != null) "${standings.season} · ${standings.currentMatchday}R 종료" else "",
+                    text = if (standings != null) "${standings.season} · ${standings.currentMatchday}R 기준" else "",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
