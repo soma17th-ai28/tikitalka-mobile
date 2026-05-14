@@ -8,8 +8,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import coil3.compose.SubcomposeAsyncImage
+import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.Spacer
+import coil3.compose.SubcomposeAsyncImage
+import org.jetbrains.compose.resources.painterResource
+import tikitalka.composeapp.generated.resources.Res
+import tikitalka.composeapp.generated.resources.ico_league_bl1
+import tikitalka.composeapp.generated.resources.ico_league_fl1
+import tikitalka.composeapp.generated.resources.ico_league_pd
+import tikitalka.composeapp.generated.resources.ico_league_pl
+import tikitalka.composeapp.generated.resources.ico_league_sa
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -113,7 +121,7 @@ internal fun StandingsContent(
                 League.entries.forEach { league ->
                     LeagueChip(
                         label = league.displayName,
-                        emblemUrl = league.emblemUrl,
+                        league = league,
                         selected = league == state.selectedLeague,
                         onClick = { onSelectLeague(league) },
                     )
@@ -161,7 +169,14 @@ internal fun StandingsContent(
 }
 
 @Composable
-private fun LeagueChip(label: String, emblemUrl: String, selected: Boolean, onClick: () -> Unit) {
+private fun LeagueChip(label: String, league: League, selected: Boolean, onClick: () -> Unit) {
+    val iconRes = when (league) {
+        League.PREMIER_LEAGUE -> Res.drawable.ico_league_pl
+        League.LA_LIGA -> Res.drawable.ico_league_pd
+        League.BUNDESLIGA -> Res.drawable.ico_league_bl1
+        League.SERIE_A -> Res.drawable.ico_league_sa
+        League.LIGUE_1 -> Res.drawable.ico_league_fl1
+    }
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
@@ -178,11 +193,11 @@ private fun LeagueChip(label: String, emblemUrl: String, selected: Boolean, onCl
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        SubcomposeAsyncImage(
-            model = emblemUrl,
-            contentDescription = label,
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = null,
             modifier = Modifier.size(16.dp),
-            error = {},
+            tint = Color.Unspecified,
         )
         Text(
             text = label,
