@@ -231,17 +231,22 @@ private fun IssueCard(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // 출처 + 요약 보기
+                // 출처 + 읽기 시간 + 읽어 보기
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = if (issue.source.length > 30) issue.source.take(30) + "…" else issue.source,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = if (issue.source.length > 30) issue.source.take(30) + "…" else issue.source,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     Text(
                         text = "읽어 보기 →",
                         style = MaterialTheme.typography.labelMedium,
