@@ -3,8 +3,6 @@ package com.soma2026.tikitalka.ui.dashboard
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.layout.ContentScale
-import coil3.compose.SubcomposeAsyncImage
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,9 +34,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.compose.SubcomposeAsyncImage
 import com.soma2026.tikitalka.domain.model.Issue
 import com.soma2026.tikitalka.presentation.dashboard.DashboardEffect
 import com.soma2026.tikitalka.presentation.dashboard.DashboardIntent
@@ -220,7 +220,7 @@ private fun IssueCard(
                     },
                 )
             }
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp)) {
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp)) {
                 // 태그 + 시간
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
