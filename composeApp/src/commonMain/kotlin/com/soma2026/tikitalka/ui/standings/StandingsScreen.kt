@@ -125,7 +125,7 @@ internal fun StandingsContent(
             // 순위 테이블
             Surface(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .weight(1f)
                     .padding(horizontal = 16.dp),
                 shape = RoundedCornerShape(12.dp),
                 color = MaterialTheme.colorScheme.surface,
@@ -150,6 +150,12 @@ internal fun StandingsContent(
                     }
                 }
             }
+
+            // 범례
+            StandingsLegend(
+                leagueCode = state.selectedLeague.code,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+            )
         }
     }
 }
@@ -342,50 +348,99 @@ private fun TeamRow(team: TeamStanding, leagueCode: String) {
 
 private enum class PositionZone { UCL, EL, ECL, MID, PLAYOFF, RELEGATION }
 
-@Composable
-private fun positionZoneColor(position: Int, leagueCode: String): Color {
-    val zone = when (leagueCode) {
-        "PL" -> when (position) {
-            in 1..4 -> PositionZone.UCL
-            5 -> PositionZone.EL
-            6 -> PositionZone.ECL
-            in 18..20 -> PositionZone.RELEGATION
-            else -> PositionZone.MID
-        }
-        "PD" -> when (position) {
-            in 1..4 -> PositionZone.UCL
-            5, 6 -> PositionZone.EL
-            in 18..20 -> PositionZone.RELEGATION
-            else -> PositionZone.MID
-        }
-        "BL1" -> when (position) {
-            in 1..4 -> PositionZone.UCL
-            5, 6 -> PositionZone.EL
-            16 -> PositionZone.PLAYOFF
-            in 17..18 -> PositionZone.RELEGATION
-            else -> PositionZone.MID
-        }
-        "SA" -> when (position) {
-            in 1..4 -> PositionZone.UCL
-            5, 6 -> PositionZone.EL
-            in 18..20 -> PositionZone.RELEGATION
-            else -> PositionZone.MID
-        }
-        "FL1" -> when (position) {
-            in 1..3 -> PositionZone.UCL
-            4, 5 -> PositionZone.EL
-            16 -> PositionZone.PLAYOFF
-            in 17..18 -> PositionZone.RELEGATION
-            else -> PositionZone.MID
-        }
+private fun positionZone(position: Int, leagueCode: String): PositionZone = when (leagueCode) {
+    "PL" -> when (position) {
+        in 1..4 -> PositionZone.UCL
+        5 -> PositionZone.EL
+        6 -> PositionZone.ECL
+        in 18..20 -> PositionZone.RELEGATION
         else -> PositionZone.MID
     }
-    return when (zone) {
-        PositionZone.UCL -> MaterialTheme.colorScheme.primary
-        PositionZone.EL -> MaterialTheme.colorScheme.tertiary
-        PositionZone.ECL -> Color(0xFF22C55E).copy(alpha = 0.6f)
-        PositionZone.PLAYOFF -> MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
-        PositionZone.RELEGATION -> MaterialTheme.colorScheme.error
-        PositionZone.MID -> Color.Transparent
+    "PD" -> when (position) {
+        in 1..4 -> PositionZone.UCL
+        5, 6 -> PositionZone.EL
+        in 18..20 -> PositionZone.RELEGATION
+        else -> PositionZone.MID
+    }
+    "BL1" -> when (position) {
+        in 1..4 -> PositionZone.UCL
+        5, 6 -> PositionZone.EL
+        16 -> PositionZone.PLAYOFF
+        in 17..18 -> PositionZone.RELEGATION
+        else -> PositionZone.MID
+    }
+    "SA" -> when (position) {
+        in 1..4 -> PositionZone.UCL
+        5, 6 -> PositionZone.EL
+        in 18..20 -> PositionZone.RELEGATION
+        else -> PositionZone.MID
+    }
+    "FL1" -> when (position) {
+        in 1..3 -> PositionZone.UCL
+        4, 5 -> PositionZone.EL
+        16 -> PositionZone.PLAYOFF
+        in 17..18 -> PositionZone.RELEGATION
+        else -> PositionZone.MID
+    }
+    else -> PositionZone.MID
+}
+
+@Composable
+private fun positionZoneColor(position: Int, leagueCode: String): Color =
+    zoneColor(positionZone(position, leagueCode))
+
+@Composable
+private fun zoneColor(zone: PositionZone): Color = when (zone) {
+    PositionZone.UCL -> MaterialTheme.colorScheme.primary
+    PositionZone.EL -> MaterialTheme.colorScheme.tertiary
+    PositionZone.ECL -> Color(0xFF22C55E).copy(alpha = 0.6f)
+    PositionZone.PLAYOFF -> MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
+    PositionZone.RELEGATION -> MaterialTheme.colorScheme.error
+    PositionZone.MID -> Color.Transparent
+}
+
+private fun leagueZones(leagueCode: String): List<PositionZone> = when (leagueCode) {
+    "PL" -> listOf(PositionZone.UCL, PositionZone.EL, PositionZone.ECL, PositionZone.RELEGATION)
+    "BL1", "FL1" -> listOf(PositionZone.UCL, PositionZone.EL, PositionZone.PLAYOFF, PositionZone.RELEGATION)
+    else -> listOf(PositionZone.UCL, PositionZone.EL, PositionZone.RELEGATION)
+}
+
+private fun PositionZone.label(): String = when (this) {
+    PositionZone.UCL -> "챔피언스리그"
+    PositionZone.EL -> "유로파리그"
+    PositionZone.ECL -> "컨퍼런스리그"
+    PositionZone.PLAYOFF -> "강등 플레이오프"
+    PositionZone.RELEGATION -> "강등"
+    PositionZone.MID -> ""
+}
+
+@Composable
+private fun StandingsLegend(leagueCode: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        leagueZones(leagueCode).forEach { zone ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(3.dp)
+                        .height(14.dp)
+                        .background(
+                            color = zoneColor(zone),
+                            shape = RoundedCornerShape(2.dp),
+                        ),
+                )
+                Text(
+                    text = zone.label(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
