@@ -74,6 +74,11 @@ android {
             "BASE_URL",
             "\"${localProperties["base.url"] ?: "http://10.0.2.2:8080/"}\"",
         )
+        buildConfigField(
+            "String",
+            "FOOTBALL_API_KEY",
+            "\"${localProperties["FOOTBALL_API_KEY"] ?: ""}\"",
+        )
     }
     buildFeatures {
         buildConfig = true
