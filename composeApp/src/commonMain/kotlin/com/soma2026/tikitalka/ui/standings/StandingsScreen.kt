@@ -113,6 +113,7 @@ internal fun StandingsContent(
                 League.entries.forEach { league ->
                     LeagueChip(
                         label = league.displayName,
+                        emblemUrl = league.emblemUrl,
                         selected = league == state.selectedLeague,
                         onClick = { onSelectLeague(league) },
                     )
@@ -160,8 +161,8 @@ internal fun StandingsContent(
 }
 
 @Composable
-private fun LeagueChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    Box(
+private fun LeagueChip(label: String, emblemUrl: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
             .background(
@@ -173,9 +174,16 @@ private fun LeagueChip(label: String, selected: Boolean, onClick: () -> Unit) {
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = onClick,
             )
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center,
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
+        SubcomposeAsyncImage(
+            model = emblemUrl,
+            contentDescription = label,
+            modifier = Modifier.size(16.dp),
+            error = {},
+        )
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
