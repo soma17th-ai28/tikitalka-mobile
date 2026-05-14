@@ -66,6 +66,10 @@ fun networkModule(baseUrl: String, isDebug: Boolean = false) = module {
 fun footballNetworkModule(apiKey: String) = module {
     single(footballClient) {
         HttpClient {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 90_000
+                connectTimeoutMillis = 10_000
+            }
             install(ContentNegotiation) {
                 json(Json { ignoreUnknownKeys = true })
             }
