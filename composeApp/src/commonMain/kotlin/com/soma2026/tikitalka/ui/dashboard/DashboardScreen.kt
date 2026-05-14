@@ -154,6 +154,7 @@ internal fun DashboardContent(
                         items(state.issues, key = { it.id }) { issue ->
                             IssueCard(
                                 issue = issue,
+                                isRead = issue.id in state.readIssueIds,
                                 onClick = { onIssueClick(issue.id) },
                             )
                         }
@@ -180,6 +181,7 @@ internal fun DashboardContent(
 @Composable
 private fun IssueCard(
     issue: Issue,
+    isRead: Boolean = false,
     onClick: () -> Unit,
 ) {
     Surface(
@@ -188,8 +190,8 @@ private fun IssueCard(
             .padding(horizontal = 16.dp)
             .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 2.dp,
+        color = if (isRead) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
+        shadowElevation = if (isRead) 0.dp else 2.dp,
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp)) {
                 // 태그 + 시간
@@ -211,7 +213,7 @@ private fun IssueCard(
                 Text(
                     text = issue.title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = if (isRead) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -243,7 +245,7 @@ private fun IssueCard(
                     Text(
                         text = "읽어 보기 →",
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = if (isRead) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
                     )
                 }
         }
@@ -319,6 +321,17 @@ private fun DashboardContentDarkPreview() {
     TikiTalkaTheme(darkTheme = true) {
         DashboardContent(
             state = DashboardState(issues = previewIssues),
+            onIssueClick = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DashboardContentWithReadPreview() {
+    TikiTalkaTheme {
+        DashboardContent(
+            state = DashboardState(issues = previewIssues, readIssueIds = setOf("1", "3")),
             onIssueClick = {},
         )
     }
