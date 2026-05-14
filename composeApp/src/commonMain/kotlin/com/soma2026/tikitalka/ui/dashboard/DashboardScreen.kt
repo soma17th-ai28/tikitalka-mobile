@@ -34,9 +34,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.compose.SubcomposeAsyncImage
 import com.soma2026.tikitalka.domain.model.Issue
 import com.soma2026.tikitalka.presentation.dashboard.DashboardEffect
 import com.soma2026.tikitalka.presentation.dashboard.DashboardIntent
@@ -193,7 +195,32 @@ private fun IssueCard(
         color = if (isRead) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface,
         shadowElevation = if (isRead) 0.dp else 2.dp,
     ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp)) {
+        Column {
+            if (!issue.imageUrl.isNullOrBlank()) {
+                SubcomposeAsyncImage(
+                    model = issue.imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    contentScale = ContentScale.Crop,
+                    loading = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                        )
+                    },
+                    error = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                        )
+                    },
+                )
+            }
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp)) {
                 // 태그 + 시간
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -248,6 +275,7 @@ private fun IssueCard(
                         color = if (isRead) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
                     )
                 }
+            }
         }
     }
 }
@@ -281,6 +309,7 @@ private val previewIssues = listOf(
         hotnessScore = 98,
         url = "",
         source = "L'Equipe",
+        imageUrl = "https://example.com/image.jpg",
     ),
     Issue(
         id = "2",
@@ -301,6 +330,7 @@ private val previewIssues = listOf(
         hotnessScore = 85,
         url = "",
         source = "UEFA",
+        imageUrl = "https://example.com/image2.jpg",
     ),
 )
 
