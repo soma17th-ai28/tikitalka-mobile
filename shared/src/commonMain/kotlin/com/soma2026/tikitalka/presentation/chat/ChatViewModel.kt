@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
@@ -70,24 +69,22 @@ class ChatViewModel(
         val text = (overrideText ?: _state.value.inputText).trim()
         if (text.isBlank() || _state.value.isSending) return
 
+        val userMessage = ChatMessage(
+            role = MessageRole.USER,
+            content = text,
+            suggestedQuestion = null,
+            createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
+        )
+
+        _state.update {
+            it.copy(
+                messages = it.messages + userMessage,
+                inputText = "",
+                isSending = true,
+            )
+        }
+
         viewModelScope.launch {
-            val now: Instant = Instant.fromEpochMilliseconds(Clock.System.now().toEpochMilliseconds())
-            val userMessage =
-                ChatMessage(
-                    role = MessageRole.USER,
-                    content = text,
-                    suggestedQuestion = null,
-                    createdAt = now.toLocalDateTime(TimeZone.currentSystemDefault()).toString(),
-                )
-
-            _state.update {
-                it.copy(
-                    messages = it.messages + userMessage,
-                    inputText = "",
-                    isSending = true,
-                )
-            }
-
             sendChatMessage(deviceId, text)
                 .onSuccess { response ->
                     _state.update {
