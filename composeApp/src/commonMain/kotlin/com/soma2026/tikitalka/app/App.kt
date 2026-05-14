@@ -28,13 +28,16 @@ import com.soma2026.tikitalka.navigation.Screen
 import com.soma2026.tikitalka.ui.chat.ChatScreen
 import com.soma2026.tikitalka.ui.dashboard.DashboardScreen
 import com.soma2026.tikitalka.ui.issuedetail.IssueDetailScreen
+import com.soma2026.tikitalka.ui.standings.StandingsScreen
 import com.soma2026.tikitalka.ui.theme.TikiTalkaTheme
 import org.jetbrains.compose.resources.painterResource
 import tikitalka.composeapp.generated.resources.Res
 import tikitalka.composeapp.generated.resources.ico_bot_fs_chatbot
 import tikitalka.composeapp.generated.resources.ico_bot_fs_feed
+import tikitalka.composeapp.generated.resources.ico_bot_fs_standings
 import tikitalka.composeapp.generated.resources.ico_bot_ts_chatbot
 import tikitalka.composeapp.generated.resources.ico_bot_ts_feed
+import tikitalka.composeapp.generated.resources.ico_bot_ts_standings
 
 @Composable
 fun App() {
@@ -42,7 +45,9 @@ fun App() {
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
-        val showNavBar = currentRoute == Screen.Dashboard.route || currentRoute == Screen.Chat.route
+        val showNavBar = currentRoute == Screen.Dashboard.route ||
+            currentRoute == Screen.Chat.route ||
+            currentRoute == Screen.Standings.route
 
         Column(modifier = Modifier.fillMaxSize()) {
             val bottomInset = if (showNavBar) 72.dp else 0.dp
@@ -66,6 +71,9 @@ fun App() {
                     composable(Screen.Chat.route) {
                         ChatScreen()
                     }
+                    composable(Screen.Standings.route) {
+                        StandingsScreen()
+                    }
                     composable<IssueDetailRoute> { backStackEntry ->
                         val route = backStackEntry.toRoute<IssueDetailRoute>()
                         IssueDetailScreen(
@@ -84,6 +92,7 @@ fun App() {
                 ) {
                     val isDashboard = currentRoute == Screen.Dashboard.route
                     val isChat = currentRoute == Screen.Chat.route
+                    val isStandings = currentRoute == Screen.Standings.route
 
                     val itemColors =
                         NavigationBarItemDefaults.colors(
@@ -94,6 +103,25 @@ fun App() {
                             unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
 
+                    NavigationBarItem(
+                        selected = isStandings,
+                        onClick = {
+                            navController.navigate(Screen.Standings.route) {
+                                popUpTo(Screen.Dashboard.route) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(if (isStandings) Res.drawable.ico_bot_ts_standings else Res.drawable.ico_bot_fs_standings),
+                                contentDescription = "순위",
+                            )
+                        },
+                        label = { Text("순위", style = MaterialTheme.typography.labelSmall) },
+                        colors = itemColors,
+                    )
                     NavigationBarItem(
                         selected = isDashboard,
                         onClick = {

@@ -32,6 +32,7 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
+            implementation(libs.coil.svg)
         }
         commonMain.dependencies {
             implementation(projects.shared)
@@ -47,6 +48,8 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kotlinx.datetime)
             implementation(libs.navigation.compose)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -73,6 +76,11 @@ android {
             "String",
             "BASE_URL",
             "\"${localProperties["base.url"] ?: "http://10.0.2.2:8080/"}\"",
+        )
+        buildConfigField(
+            "String",
+            "FOOTBALL_API_KEY",
+            "\"${localProperties["FOOTBALL_API_KEY"] ?: ""}\"",
         )
     }
     buildFeatures {
