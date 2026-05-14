@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -154,6 +155,7 @@ internal fun DashboardContent(
                         items(state.issues, key = { it.id }) { issue ->
                             IssueCard(
                                 issue = issue,
+                                isRead = issue.id in state.readIssueIds,
                                 onClick = { onIssueClick(issue.id) },
                             )
                         }
@@ -180,16 +182,18 @@ internal fun DashboardContent(
 @Composable
 private fun IssueCard(
     issue: Issue,
+    isRead: Boolean = false,
     onClick: () -> Unit,
 ) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
+            .alpha(if (isRead) 0.5f else 1f)
             .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 2.dp,
+        shadowElevation = if (isRead) 0.dp else 2.dp,
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp)) {
                 // 태그 + 시간
@@ -319,6 +323,17 @@ private fun DashboardContentDarkPreview() {
     TikiTalkaTheme(darkTheme = true) {
         DashboardContent(
             state = DashboardState(issues = previewIssues),
+            onIssueClick = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DashboardContentWithReadPreview() {
+    TikiTalkaTheme {
+        DashboardContent(
+            state = DashboardState(issues = previewIssues, readIssueIds = setOf("1", "3")),
             onIssueClick = {},
         )
     }
