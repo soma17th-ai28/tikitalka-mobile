@@ -104,6 +104,25 @@ fun App() {
                         )
 
                     NavigationBarItem(
+                        selected = isStandings,
+                        onClick = {
+                            navController.navigate(Screen.Standings.route) {
+                                popUpTo(Screen.Dashboard.route) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = painterResource(if (isStandings) Res.drawable.ico_bot_ts_standings else Res.drawable.ico_bot_fs_standings),
+                                contentDescription = "순위",
+                            )
+                        },
+                        label = { Text("순위", style = MaterialTheme.typography.labelSmall) },
+                        colors = itemColors,
+                    )
+                    NavigationBarItem(
                         selected = isDashboard,
                         onClick = {
                             navController.navigate(Screen.Dashboard.route) {
@@ -139,25 +158,6 @@ fun App() {
                             )
                         },
                         label = { Text("챗봇", style = MaterialTheme.typography.labelSmall) },
-                        colors = itemColors,
-                    )
-                    NavigationBarItem(
-                        selected = isStandings,
-                        onClick = {
-                            navController.navigate(Screen.Standings.route) {
-                                popUpTo(Screen.Dashboard.route) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                painter = painterResource(if (isStandings) Res.drawable.ico_bot_ts_standings else Res.drawable.ico_bot_fs_standings),
-                                contentDescription = "순위",
-                            )
-                        },
-                        label = { Text("순위", style = MaterialTheme.typography.labelSmall) },
                         colors = itemColors,
                     )
                 }
