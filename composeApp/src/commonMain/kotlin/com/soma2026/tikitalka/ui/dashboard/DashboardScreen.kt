@@ -231,7 +231,7 @@ private fun IssueCard(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // 출처 + 요약 보기
+                // 출처 + 읽어 보기
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,

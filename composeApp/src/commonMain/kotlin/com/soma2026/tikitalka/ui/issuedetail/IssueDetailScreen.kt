@@ -44,11 +44,13 @@ import com.soma2026.tikitalka.presentation.issuedetail.IssueDetailIntent
 import com.soma2026.tikitalka.presentation.issuedetail.IssueDetailState
 import com.soma2026.tikitalka.presentation.issuedetail.IssueDetailViewModel
 import com.soma2026.tikitalka.ui.theme.TikiTalkaTheme
+import com.soma2026.tikitalka.ui.util.estimatedReadingMinutes
 import com.soma2026.tikitalka.ui.util.toRelativeTimeString
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import tikitalka.composeapp.generated.resources.Res
 import tikitalka.composeapp.generated.resources.ico_btn_back
+import tikitalka.composeapp.generated.resources.ico_issue_eye
 
 @Composable
 fun IssueDetailScreen(
@@ -214,12 +216,13 @@ private fun IssueDetailBody(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        if (!issue.originalContent.isNullOrBlank()) {
+        val originalContent = issue.originalContent
+        if (!originalContent.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(20.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 본문 헤더 + 언어 토글
+            // 본문 헤더 + 읽기 시간 + 언어 토글
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -228,6 +231,17 @@ private fun IssueDetailBody(
                     text = "본문",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
+                )
+                Icon(
+                    painter = painterResource(Res.drawable.ico_issue_eye),
+                    contentDescription = null,
+                    modifier = Modifier.padding(start = 6.dp).size(12.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = " ${estimatedReadingMinutes(originalContent)}분 읽기",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 LanguageToggle(
@@ -244,7 +258,7 @@ private fun IssueDetailBody(
                 }
             } else {
                 Text(
-                    text = translatedContent ?: issue.originalContent ?: "",
+                    text = translatedContent ?: originalContent,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
