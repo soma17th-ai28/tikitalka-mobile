@@ -200,7 +200,7 @@ private fun TableHeaderRow() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Spacer(modifier = Modifier.width(3.dp)) // 인디케이터 공간
@@ -213,16 +213,18 @@ private fun TableHeaderRow() {
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(28.dp)) // 로고 자리
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "팀",
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        listOf("P", "W", "L", "GD", "PTS").forEach { header ->
+        listOf("P", "W", "D", "L", "GD", "PTS").forEach { header ->
             Text(
                 text = header,
-                modifier = Modifier.width(if (header == "PTS" || header == "GD") 40.dp else 32.dp),
+                modifier = Modifier.width(if (header == "PTS" || header == "GD") 40.dp else 28.dp),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -300,11 +302,11 @@ private fun TeamRow(team: TeamStanding, leagueCode: String) {
             overflow = TextOverflow.Ellipsis,
         )
 
-        // P, W, L
-        listOf(team.playedGames, team.won, team.lost).forEach { value ->
+        // P, W, D, L
+        listOf(team.playedGames, team.won, team.drawn, team.lost).forEach { value ->
             Text(
                 text = "$value",
-                modifier = Modifier.width(32.dp),
+                modifier = Modifier.width(28.dp),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

@@ -7,6 +7,7 @@ data class TeamStanding(
     val crestUrl: String,
     val playedGames: Int,
     val won: Int,
+    val drawn: Int,
     val lost: Int,
     val points: Int,
     val goalDifference: Int,
